@@ -671,8 +671,8 @@ if not validatePrivateKey(privateKey['kty'], privateKey['crv'], privateKey['x'],
    - Check syntax.  
    - Ensure no missing or invalid data.  
 3. Check if the username already exists in the database. (Checking if the User is an Admin)
-4. If the User is an admin validate his email exists in the database in **KittycashUser** or not 
-5. If a referral exists, verify that the referrer is a valid user.  
+4. If the User is an admin validate whether his email exists in the database in **KittycashUser** or not
+5.  If a referral exists(If not admin), verify that the referrer is a valid user.  
 6. Create a new user account:  
    - Store hashed password securely.  
 7. Create the user profile:  
