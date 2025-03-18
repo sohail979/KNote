@@ -691,9 +691,9 @@ if not validatePrivateKey(privateKey['kty'], privateKey['crv'], privateKey['x'],
 12. Assign User Role
 13. Return user profile details:  
     - Role, subscription, security keys, etc.
+   
 
-```
-mermaid
+```mermaid
 sequenceDiagram
     participant Client as KittyCashUser (Client)
     participant API as Flask API
@@ -760,8 +760,9 @@ sequenceDiagram
     API->>DB: Assign User Role (Regular/Admin)
     
     API-->>Client: 201 Created ✅ ("User Registered Successfully")
-
+  
 ```
+
     
       
 #### Responses 
