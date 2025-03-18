@@ -670,7 +670,7 @@ if not validatePrivateKey(privateKey['kty'], privateKey['crv'], privateKey['x'],
 2. Validate fields:  
    - Check syntax.  
    - Ensure no missing or invalid data.  
-3. Check if the username already exists in the database.  
+3. Check if the username already exists in the database. (Checking if the User is an Admin) 
 4. If a referral exists, verify that the referrer is a valid user.  
 5. Create a new user account:  
    - Store hashed password securely.  
