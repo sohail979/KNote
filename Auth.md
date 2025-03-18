@@ -690,8 +690,78 @@ if not validatePrivateKey(privateKey['kty'], privateKey['crv'], privateKey['x'],
     - Emails & SMS to both the user and the referrer.
 12. Assign User Role
 13. Return user profile details:  
-    - Role, subscription, security keys, etc.  
+    - Role, subscription, security keys, etc.
 
+```
+mermaid
+sequenceDiagram
+    participant Client as KittyCashUser (Client)
+    participant API as Flask API
+    participant DB as Database (KittyCashUser, KittyCashProfile, KittycashProfileKey, KittycashStripeCustomers, KittycashProfileInvitees)
+    participant Stripe as Stripe API
+    participant Email as Email Service
+    participant SMS as SMS Gateway
+
+    Client->>API: POST /signup (username, password, firstname, lastname, contactno, publickey, privatekey, referredby)
+    
+    API->>API: Validate Input Fields (Syntax, Missing Data)
+    alt Invalid Fields
+        API-->>Client: 400 Bad Request ("Invalid or Missing Parameters") ❌
+    end
+    
+    API->>DB: Check if Username Exists in KittyCashUser
+    alt Username Exists
+        API-->>Client: 409 Conflict ("User Already Exists") ❌
+    end
+    
+    API->>DB: Check if User is an Admin
+    alt Admin User
+        API->>DB: Verify Admin Email in KittyCashUser
+        alt Admin Email Not Found
+            API-->>Client: 403 Forbidden ("Admin Access Denied") ❌
+        end
+    else Non-Admin User
+        API->>DB: Verify Referrer Exists in KittyCashProfile
+        alt Referrer Not Found
+            API-->>Client: 404 Not Found ("Referrer Does Not Exist") ❌
+        end
+    end
+
+    API->>DB: Create New User in KittyCashUser (Store Hashed Password)
+    API->>DB: Create Profile in KittyCashProfile (Store Basic Details)
+    
+    API->>API: Validate Public & Private Keys
+    alt Invalid Encryption Keys
+        API-->>Client: 400 Bad Request ("Invalid Encryption Keys") ❌
+    end
+    
+    API->>DB: Store Encryption Keys in KittycashProfileKey
+    
+    API->>Stripe: Register User in Stripe for Payments
+    Stripe-->>API: Return Stripe Customer ID
+    API->>DB: Store Stripe Customer ID in KittycashStripeCustomers
+    
+    alt User Was Referred
+        API->>DB: Check Referral Exists in KittycashProfileInvitees
+        alt Referral Exists
+            API->>DB: Link Invitee to Referrer (Create DM Group)
+            API->>DB: Update Referrer’s Records
+        else No Referral Found
+            API-->>Client: 404 Not Found ("Referral Not Found") ❌
+        end
+    end
+    
+    API->>Email: Send Confirmation Email to User
+    API->>SMS: Send SMS Confirmation to User
+    alt User Was Referred
+        API->>Email: Notify Referrer about New Signup
+    end
+    
+    API->>DB: Assign User Role (Regular/Admin)
+    
+    API-->>Client: 201 Created ✅ ("User Registered Successfully")
+
+```
     
       
 #### Responses 
