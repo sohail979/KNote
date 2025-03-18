@@ -778,7 +778,7 @@ Then insert in db
 
 ```
 UPDATE kittycash_user 
-SET password = 'PASTE_HASHED_PASSWORD_HERE' 
+SET password = 'pbkdf2:sha256:260000$7Y5E6UzddKhBVc81$d65a90101aaadb26e43d390bd0291c4975405eed94a551576d59a60254c0ee2a' 
 WHERE username = 'testuser@example.com';
 
 ```
