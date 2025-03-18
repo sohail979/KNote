@@ -680,12 +680,16 @@ if not validatePrivateKey(privateKey['kty'], privateKey['crv'], privateKey['x'],
 8. Validate and store encryption keys in **KittycashProfileKey**:  
    - Save public and private keys securely.  
 9. Register the user in **Stripe**  in **KittycashStripeCustomers** for future subscriptions and payments.  
-10. Handle referral logic (if not admin):  
+10. Handle referral logic (if not admin):
+   - Checks if this user was invited by someone (referred by).
+   - Look in KittycashProfileInvitees to see if this invite already exists.
+   - Link the invitee to the referrer by creating a direct message group. 
    - Update the referrer’s records.  
-   - Link the invitee to the referrer.  
+     
 11. Send confirmation notifications:  
-    - Emails & SMS to both the user and the referrer.  
-12. Return user profile details:  
+    - Emails & SMS to both the user and the referrer.
+12. Assign User Role
+13. Return user profile details:  
     - Role, subscription, security keys, etc.  
 
     
