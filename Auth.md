@@ -670,21 +670,22 @@ if not validatePrivateKey(privateKey['kty'], privateKey['crv'], privateKey['x'],
 2. Validate fields:  
    - Check syntax.  
    - Ensure no missing or invalid data.  
-3. Check if the username already exists in the database. (Checking if the User is an Admin) 
-4. If a referral exists, verify that the referrer is a valid user.  
-5. Create a new user account:  
+3. Check if the username already exists in the database. (Checking if the User is an Admin)
+4. If the User is an admin validate his email exists in the database in **KittycashUser** or not 
+5. If a referral exists, verify that the referrer is a valid user.  
+6. Create a new user account:  
    - Store hashed password securely.  
-6. Create the user profile:  
+7. Create the user profile:  
    - Store basic details in **KittycashProfile**.  
-7. Validate and store encryption keys:  
+8. Validate and store encryption keys:  
    - Save public and private keys securely.  
-8. Register the user in **Stripe** for future subscriptions and payments.  
-9. Handle referral logic:  
+9. Register the user in **Stripe** for future subscriptions and payments.  
+10. Handle referral logic:  
    - Update the referrer’s records.  
    - Link the invitee to the referrer.  
-10. Send confirmation notifications:  
+11. Send confirmation notifications:  
     - Emails & SMS to both the user and the referrer.  
-11. Return user profile details:  
+12. Return user profile details:  
     - Role, subscription, security keys, etc.  
 
     
