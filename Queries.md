@@ -799,13 +799,14 @@ SELECT * FROM kittycash_profile_key WHERE pid = 'test_pid_123';
 - **Result:**
 
 
-## **40. Run Pytests **
+## **40. Run Pytests**
 - **Command:**  
   ```pytest-v```
-  - With LOgging Enabled - ```pytest -v --log-cli-level=DEBUG```
+  -  With LOgging Enabled - ```pytest -v --log-cli-level=DEBUG```
   -  Add the Project Root to PYTHONPATH
-     ```export PYTHONPATH=$(pwd)
-        pytest client/tests/ -v --log-cli-level=DEBUG
+     ```
+      export PYTHONPATH=$(pwd)
+      pytest client/tests/ -v --log-cli-level=DEBUG
      ```
 - **Result:**
 
