@@ -803,6 +803,10 @@ SELECT * FROM kittycash_profile_key WHERE pid = 'test_pid_123';
 - **Command:**  
   ```pytest-v```
   - With LOgging Enabled - ```pytest -v --log-cli-level=DEBUG```
+  -  Add the Project Root to PYTHONPATH
+     ```export PYTHONPATH=$(pwd)
+        pytest client/tests/ -v --log-cli-level=DEBUG
+     ```
 - **Result:**
 
 
