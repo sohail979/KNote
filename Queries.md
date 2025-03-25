@@ -801,7 +801,7 @@ SELECT * FROM kittycash_profile_key WHERE pid = 'test_pid_123';
 
 ## **40. Run Pytests**
 - **Command:**  
-  ```pytest-v```
+  ```pytest -v  unittestcaseclient```
   -  With LOgging Enabled - ```pytest -v --log-cli-level=DEBUG```
   -  Add the Project Root to PYTHONPATH
      ```
