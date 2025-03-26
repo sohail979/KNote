@@ -808,7 +808,7 @@ SELECT * FROM kittycash_profile_key WHERE pid = 'test_pid_123';
       export PYTHONPATH=$(pwd)
       pytest client/tests/ -v --log-cli-level=DEBUG
      ```
-  - Using Docker ``` sudo docker exec -it kittycash ls -l /kittyCash/regressiontestclient/tests``` to verify and then ``` sudo docker exec -it kittycash /kittyCash/venv/bin/pytest -v regressiontestclient ``` to execute 
+  - Using Docker ``` sudo docker exec -it kittycash ls -l /kittyCash/regressiontestclient/tests``` to verify and then ``` sudo docker exec -it kittycash /kittyCash/venv/bin/pytest -v regressiontestclient ``` to execute  & execute without coverage using ```sudo docker exec -it kittycash /kittyCash/venv/bin/pytest regressiontestclient --no-cov```
 - **Result:**
 
 
