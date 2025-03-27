@@ -671,7 +671,8 @@ sh /kittyCash/gunicorn.sh
     - Search For Errors ```grep -i "error" /kittyCash/kittycash.log``` / ```grep -i "invalid" 
          /kittyCash/kittycash.log```
     -  Check Logs with Timestamps ```grep "2024-02-28" /kittyCash/kittycash.log```
-    -  View Logs Without Entering the Container ```docker exec -it kittycash tail -f /kittyCash/kittycash.log``` 
+    -  View Logs Without Entering the Container ```docker exec -it kittycash tail -f /kittyCash/kittycash.log```
+    -  Or TRy with this ```sudo docker exec -it kittycash tail -n 50 /kittyCash/gunicorn_stdout.log```
   
 - **Result:**
 
