@@ -682,8 +682,8 @@ if not validatePrivateKey(privateKey['kty'], privateKey['crv'], privateKey['x'],
 9. Register the user in **Stripe**  in **KittycashStripeCustomers** for future subscriptions and payments.  
 10. Handle referral logic (if not admin):
    - Checks if this user was invited by someone (referred by).
-   - Look in KittycashProfileInvitees to see if this invite already exists.
-   - Link the invitee to the referrer by creating a direct message group. 
+   - Look in **KittycashProfileInvitees** to see if this invite already exists.
+   - Link the invitee to the referrer by creating a direct message group in **KittycashDirectMessageGroup** 
    - Update the referrer’s records.  
      
 11. Send confirmation notifications:  
