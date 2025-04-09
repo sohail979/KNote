@@ -811,11 +811,11 @@ SELECT * FROM kittycash_profile_key WHERE pid = 'test_pid_123';
      ```
   - Using Docker ``` sudo docker exec -it kittycash ls -l /kittyCash/regressiontestclient/tests``` to verify and then ``` sudo docker exec -it kittycash /kittyCash/venv/bin/pytest -v regressiontestclient ``` to execute  & execute without coverage using ```sudo docker exec -it kittycash /kittyCash/venv/bin/pytest regressiontestclient --no-cov```
   - Run in debug mode ```sudo docker exec -it kittycash /kittyCash/venv/bin/pytest regressiontestclient --no-cov --capture=no --log-cli-level=DEBUG```
-  - With Yaml workflows ```pytest -v --capture=no --cov=tests --cov-report=html run_tests.py --yaml=test_suite_3.yaml```
-  - No logs, no coverage (default):```python run_tests.py test_suite_3.yaml```
-  - With logs ```python run_tests.py test_suite_3.yaml --log-level=DEBUG```
-  - With coverage ```python run_tests.py test_suite_3.yaml --with-coverage```
-  - Logs and Coverage ```python run_tests.py test_suite_3.yaml --log-level=DEBUG --with-coverage```
+  - With Yaml workflows ```pytest -v --capture=no --cov=tests --cov-report=html run_tests.py --yaml=suite_3.yaml```
+  - No logs, no coverage (default):```python run_tests.py suite_3.yaml```
+  - With logs ```python run_tests.py suite_3.yaml --log-level=DEBUG```
+  - With coverage ```python run_tests.py suite_3.yaml --with-coverage```
+  - Logs and Coverage ```python run_tests.py suite_3.yaml --log-level=DEBUG --with-coverage```
 - **Result:**
 
 
