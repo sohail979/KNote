@@ -9,6 +9,7 @@
 - [Login](#Login)
   - [Login-Twophaseauth-Passcode-Validate](#Login-Twophaseauth-Passcode-Validate)
   - [Login-Twophaseauth-Passcode-Validate-Generate](#Login-Twophaseauth-Passcode-Validate-Generate)
+- [generateTokens](#generateTokens)
 - [Cleantables](#Cleantables)
 - [Signdown](#Signdown)
 - [Password](#Password)
@@ -1141,6 +1142,118 @@ sequenceDiagram
 
 ### Login-Twophaseauth-Passcode-Validate-Generate
 
+## generateTokens
+
+### **APIWorkflow**
+
+- **Rate limiting applied** using `rate_limit_from_config`.
+
+- **Extract** `refresh_token` from request using `getCleanRequestData`.
+
+- If `refresh_token` is **missing**:
+  - Return `REFRESH_TOKEN_MISSING` error.
+
+- **Decode** the refresh token via `decode_auth_tokens(token, is_refresh=True)`:
+  - If valid → return `sub` (PID).
+  -  If **expired**:
+    - Extract `username` from request.
+    - Sign out user if `user.isSignedIn()` is `True`.
+    - Commit sign-out to DB.
+    - Return `REFRESH_TOKEN_EXPIRED` error.
+  -  If **invalid**:
+    - Return `INVALID_TOKEN` error.
+
+- **Find user profile** via `KittycashProfile.query.filter_by(pid=...)`:
+  -  If not found → return `USER_PROFILE_DOESNOT_EXISTS` error.
+
+- **Find user** via `KittycashUser.query.filter_by(username=...)`:
+  -  If not found → return `USER_NOT_FOUND` error.
+
+- **Check if** `user.refreshToken == provided refresh_token`:
+  -  If not matching → return `INVALID_REFRESH_TOKEN` error.
+
+- **Call** `refresh_tokens(user, pid, refresh_token)`:
+  - If access token is **invalid**:
+    - Generate new access & refresh tokens via `encode_auth_tokens(pid)`.
+    - Update tokens in DB with `user.updateTokens(...)`.
+    - Commit DB changes.
+    - Return new tokens.
+  - If access token still **valid**:
+    - Return `ACTIVE_ACCESS_TOKEN` error.
+
+- **If successful**:
+  - Return new `access_token` and `refresh_token` with status `200`.
+
+- **If any exception occurs**:
+  - Log the error with `print()`.
+  - Return `REFRESH_TOKEN_EXPIRED` error.
+
+
+
+ 
+```mermaid
+sequenceDiagram
+    participant Client as KittyCashUser (Client)
+    participant API as Flask API
+    participant DB as Database (KittyCashUser, KittyCashProfile)
+    participant JWT as JWT Decoder/Generator
+
+    Client->>API: POST /generateTokens (refresh_token)
+
+    API->>API: Extract refresh_token from request
+    alt refresh_token missing
+        API-->>Client: 400 Bad Request  ("Refresh token missing")
+    else Token Provided
+        API->>JWT: Decode refresh_token (is_refresh=True)
+        alt Valid Token
+            JWT-->>API: Return PID (user id)
+        else Expired Token
+            API->>API: Extract username from request
+            API->>DB: Find user by username
+            DB-->>API: Return user
+            API->>API: Sign user out if signed in
+            API->>DB: Commit sign-out
+            API-->>Client: 401 Unauthorized  ("Refresh Token Expired")
+        else Invalid Token
+            API-->>Client: 401 Unauthorized  ("Invalid Token")
+        end
+
+        API->>DB: Fetch KittyCashProfile by PID
+        alt Profile not found
+            API-->>Client: 404 Not Found  ("User profile does not exist")
+        else Profile found
+            DB-->>API: Return profile
+
+            API->>DB: Fetch KittyCashUser by username
+            alt User not found
+                API-->>Client: 404 Not Found ("User not found")
+            else User found
+                DB-->>API: Return user
+                API->>API: Compare refresh_token with user's stored token
+                alt Token mismatch
+                    API-->>Client: 401 Unauthorized  ("Invalid refresh token")
+                else Token matches
+                    API->>API: Call refresh_tokens(user, pid, refresh_token)
+                    API->>API: Check access token validity
+                    alt Access token still valid
+                        API-->>Client: 409 Conflict  ("Active access token exists")
+                    else Token expired or invalid
+                        API->>JWT: Generate new access & refresh tokens
+                        JWT-->>API: Return tokens
+                        API->>DB: Update user tokens
+                        API->>DB: Commit changes
+                        API-->>Client: 200 OK (Return new tokens)
+                    end
+                end
+            end
+        end
+    end
+
+    alt Unhandled Exception
+        API-->>Client: 500 Internal Server Error ("Refresh token expired")
+    end
+   
+```
 
 ## Cleantables 
 
@@ -1157,6 +1270,80 @@ sequenceDiagram
 
 ## Logout 
 
+### API Workflow 
+
+- **Token Validation** via `@token_required` decorator:
+  - Validates the access token.
+  - Extracts the authenticated user’s `pid` from the token.
+
+-  **Extract** `username` from request using `getCleanRequestData('username')`.
+
+- **Validate** the `username`:
+  - Uses `validUsername(username)` to check format and constraints.
+  - If invalid or missing:
+    - Return `LOGIN_FAILED_DUE_TO_CREDENTIAL_MISMATCH`.
+    - Message: `"Invalid username <username>"`.
+
+- **Fetch user** from DB:
+  - Query: `KittycashUser.query.filter_by(username=username).first()`
+
+- **Check sign-in status**:
+  - If `user.isSignedIn()` returns `True`:
+    - Call `user.revokeAllTokens()` — revokes access and refresh tokens.
+    - Call `user.signout()` — updates sign-in status.
+    - `db.session.commit()` — persists the logout and token changes.
+
+- **Error handling**:
+  - On any exception:
+    - Log the error message.
+    - Roll back changes via `db.session.rollback()`.
+    - Return `KITTYCASH_INTERNAL_ERROR`.
+    - Message from config: `CONFIG_AUTH["KITTYCASH_LOGOUT_ERROR"]`.
+
+- **On successful logout**:
+  - Return: `{"message": "logged-out successfully!"}`
+  - With HTTP status: `HTTP_SUCCESS`.
+ 
+
+ 
+```mermaid
+sequenceDiagram
+    participant Client as KittyCashUser (Client)
+    participant API as Flask API
+    participant DB as Database (KittyCashUser)
+    participant JWT as Token Validator
+
+    Client->>API: POST /logout (username, access_token)
+
+    API->>JWT: Validate Access Token via @token_required
+    alt Invalid or Missing Token
+        API-->>Client: 401 Unauthorized  ("Token Invalid or Missing")
+    else Token Valid
+        API->>API: Extract username from request
+        API->>API: Validate username format
+        alt Invalid Username
+            API-->>Client: 400 Bad Request ("Invalid username")
+        else Valid Username
+            API->>DB: Fetch KittyCashUser by username
+            DB-->>API: Return user
+            API->>API: Check if user.isSignedIn()
+            alt User is Signed In
+                API->>API: Revoke all tokens (revokeAllTokens)
+                API->>API: Mark user as signed out (signout)
+                API->>DB: Commit changes
+            else User is not Signed In
+                Note right of API: No token/session to revoke
+            end
+            API-->>Client: 200 OK ("logged-out successfully!")
+        end
+    end
+
+    alt Exception occurs
+        API->>DB: Rollback transaction
+        API-->>Client: 500 Internal Server Error ("Logout failed due to internal error")
+    end
+
+```
 ## Webhook 
 
 
