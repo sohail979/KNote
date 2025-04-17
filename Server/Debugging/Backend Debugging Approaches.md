@@ -5,7 +5,7 @@ This document provides troubleshooting steps for diagnosing and resolving common
 
 ---
 
-## **1. Check If the Container Exited** ✅
+## **1. Check If the Container Exited** 
 - **Command:**  
   ```docker ps -a | grep kittycash```
 - **Result:**
@@ -13,14 +13,14 @@ This document provides troubleshooting steps for diagnosing and resolving common
 "/kittyCash/gunicorn…"   5 minutes ago   Exited (2) 4 minutes ago   kittycash 
 
 ## **2.Check Database & Redis Connectivity(Manually connect to the database from another container)**
-- **Command:** ✅
+- **Command:** 
   - docker exec -it kittycash_db psql -U postgres -d mydb
 - **Result:**
   -  Connecting 
   -  sql: error: connection to server on socket "/var/run/postgresql/.s.PGSQL.5432" failed: FATAL:  role "-d" does not exist - This error with  the following command **docker exec -it kittycash_db psql -U $POSTGRES_USER -d $DB_NAME**
 
 
-## **3.Run the Container in Debug Mode** 🔴
+## **3.Run the Container in Debug Mode** 
 - **Command:**  
   ``` sudo docker run --rm -it --entrypoint /bin/sh vamsikrishnasadhu.hub.docker.com/dev-kittycash/kittycash:latest ```
    - **Approach1:**  Manually Start Flask
@@ -36,7 +36,7 @@ This document provides troubleshooting steps for diagnosing and resolving common
      - gunicorn: command not found
 
 ##  **4.List all environment variables inside the kittycash container**
-- **Command:**  🔴
+- **Command:**  
   ```docker run --rm -it --entrypoint /bin/sh vamsikrishnasadhu.hub.docker.com/dev-kittycash/kittycash:latest -c "env"```
 - **Result:**
 HOSTNAME=caf0969e995d
@@ -55,7 +55,7 @@ these are showing results at path _=/usr/bin/env not environmen variables as exp
 
 
 
-## **5.Running the image** 🔴
+## **5.Running the image** 
 - **Command:**
     ```sudo docker run --rm -it vamsikrishnasadhu.hub.docker.com/dev-kittycash/kittycash:latest /bin/bash```
 - **Result:**
@@ -110,7 +110,7 @@ Fetch the logs of a container
       _=/usr/bin/env
      ```
 
-## **6. Check If the Container Exited** 🔴
+## **6. Check If the Container Exited** 
 - **Command:**  
   ```docker logs $(docker ps -a | grep kittycash | awk '{print $1}')```
 - **Result:**
@@ -122,13 +122,13 @@ Usage:  docker logs [OPTIONS] CONTAINER
 
 Fetch the logs of a container
 
-## **7. Python & Gunicorn Issues** 🔴
+## **7. Python & Gunicorn Issues** 
 - **Command:**  
   ```docker run --rm -it --entrypoint /bin/bash vamsikrishnasadhu.hub.docker.com/dev-kittycash/kittycash:latest``` and then check if flask and Gunicorn are intstalled 
 - **Result:**
    - They are not installed using ```pip install flask gunicorn```
 
-## **8. gunicorn.sh Permissions** ✅
+## **8. gunicorn.sh Permissions** 
 - **Command:**  
   - docker run --rm -it --entrypoint /bin/bash vamsikrishnasadhu.hub.docker.com/dev-kittycash/kittycash:latest
 ls -l /kittyCash/gunicorn.sh
@@ -138,20 +138,20 @@ ls -l /kittyCash/gunicorn.sh
  
 
 
-## **9. Fix the Database Connectivity**✅
+## **9. Fix the Database Connectivity**
 - **Command:**  
   ```docker exec -it kittycash_db psql -U postgres -d mydb```
 - **Result:**
    - Success 
     
 
-## **10. Fix Environment Variables**🔴
+## **10. Fix Environment Variables**
 - **Command:**  
   ```docker exec -it kittycash /bin/bash``` then check if .env exists using ```ls -l /kittyCash/.env```
 - **Result:**
    - Error response from daemon: container ea0bc5f052aeaa37ef9543ea22d037365bbf877ffa9dd3a39959a4309a1cd9a7 is not running
 
-## **11. Container Crashes Immediately-If it crashes due to gunicorn.sh, try running it manually:** 🔴
+## **11. Container Crashes Immediately-If it crashes due to gunicorn.sh, try running it manually:** 
 - **Command:**  
   - docker run --rm -it --entrypoint /bin/bash vamsikrishnasadhu.hub.docker.com/dev-kittycash/kittycash:latest
 sh /kittyCash/gunicorn.sh
