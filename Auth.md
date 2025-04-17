@@ -322,7 +322,7 @@ if not validatePrivateKey(privateKey['kty'], privateKey['crv'], privateKey['x'],
      - Profile ID (profile.pid)
      - Full name (profile.firstname + " " + profile.lastname)
      - Username (used as Stripe’s customer email).
-  - ✅ Purpose: Helps handle future subscriptions/payments for the user.
+  -  Purpose: Helps handle future subscriptions/payments for the user.
 
 -  **Referral Handling (if not Admin)**
    - Checks if this user was invited by someone (referredby).
@@ -384,7 +384,7 @@ if not validatePrivateKey(privateKey['kty'], privateKey['crv'], privateKey['x'],
 
    - Creates a direct message (DM) group between the referrer (referredby_profile.pid) and the newly signed-up user (profile.pid).
    - Extracts the dmid (Direct Message ID) from the response.
-   - ✅ Purpose: Enables referrer-invitee messaging.
+   - Purpose: Enables referrer-invitee messaging.
 
  **createDirectMessageGroupInternal Function**
 
@@ -480,7 +480,7 @@ if not validatePrivateKey(privateKey['kty'], privateKey['crv'], privateKey['x'],
   - Stores the group in the database.
   - Connection to /signup:
     - Used when a new user is invited and needs a referral-based DM group.
-    - ✅ Ensures all users have secure, organized group messaging.
+    - Ensures all users have secure, organized group messaging.
    
 
 **addDirectMessageGroupProfileInternal Function**
@@ -510,7 +510,7 @@ if not validatePrivateKey(privateKey['kty'], privateKey['crv'], privateKey['x'],
      - The user has permission to add new members.
   - Connection to /signup:
     - Used when the new user joins a referral-based group.
-    - ✅ Ensures users can only join valid groups where they are authorized.   
+    - Ensures users can only join valid groups where they are authorized.   
     
 **getUserProfilePhotoPath Function**
 
@@ -536,7 +536,7 @@ if not validatePrivateKey(privateKey['kty'], privateKey['crv'], privateKey['x'],
 - If the file doesn’t exist locally, return a default profile picture.
 - Connection to /signup:
    - Used when returning user details in the signup response.
-   - ✅ Ensures every user has a profile picture, even if they haven’t uploaded one.
+   - Ensures every user has a profile picture, even if they haven’t uploaded one.
     
     
 
@@ -556,7 +556,7 @@ if not validatePrivateKey(privateKey['kty'], privateKey['crv'], privateKey['x'],
      - Mark the invitee as REGISTERED.
      - Associate the invitee’s pid.
      - Link the direct message group (dmid).
-     - ✅ Purpose: Keeps referral data & messaging system in sync.
+     - Purpose: Keeps referral data & messaging system in sync.
 
 - **Sending Email Notification to the Referrer(If not the adminProfile)**
 
@@ -570,7 +570,7 @@ if not validatePrivateKey(privateKey['kty'], privateKey['crv'], privateKey['x'],
     ```
 
      - Sends an email notification to the referrer about the successful signup of their invitee.
-     - ✅ Purpose: Keeps the referrer informed.
+     - Purpose: Keeps the referrer informed.
 
 - **Sending Email & SMS Notification to the New User**
 
@@ -585,7 +585,7 @@ if not validatePrivateKey(privateKey['kty'], privateKey['crv'], privateKey['x'],
 
      - Sends a signup success email to the new user (username).
      - Sends a confirmation SMS to the user’s phone (contactno).
-     - ✅ Purpose: Confirms signup & prompts login verification.
+     - Purpose: Confirms signup & prompts login verification.
 
 - **Setting Up Subscription & Pricing Details**
 
@@ -665,7 +665,7 @@ if not validatePrivateKey(privateKey['kty'], privateKey['crv'], privateKey['x'],
   - Success message.
 
 
-### APIWorkflow
+### API WorkFlow
  
 1. Receive input parameters from the request body.  
 2. Validate fields:  
@@ -1062,7 +1062,7 @@ sequenceDiagram
  .
 
 
-### APIWorkflow
+### API WorkFlow
 
 - Receives login credentials.
 - Validates input data.
@@ -1144,7 +1144,7 @@ sequenceDiagram
 
 ## generateTokens
 
-### **APIWorkflow**
+### **API WorkFlow**
 
 - **Rate limiting applied** using `rate_limit_from_config`.
 
@@ -1262,8 +1262,69 @@ sequenceDiagram
 
 
 ## Password
-
 ### Password-Recover
+#### API WorkFlow 
+-  Receive Username
+   - The API receives a username from the request using getCleanRequestData('username')
+   - It checks if the username is valid using validUsername(username).
+   - If the username is invalid, a failure response is returned, indicating that authentication failed.
+-  Check User Existence
+   - Queries the KittycashUser database to check if the username exists.
+   - If the user is not found, the API returns an error response stating that the user does not exist.
+- Generate Temporary Password
+  - A random password is generated using generateRandomPassword().
+  - This password is hashed using generate_password_hash(random).
+  - The temporary password is stored in the database under user.temppassword.
+- Send Email Notification
+  - The system formats the email content to include the temporary password.
+  - An email is sent using emailUser.submit(username, subject, contents), notifying the user about the password reset.
+- Send SMS Notification
+  - Retrieves the user's contact number from KittycashProfile.query.filter_by(username=username).first().
+  - Sends an SMS message using smsUser.submit(str(profile.contactno), message), notifying the user that the temporary password has been sent via email.
+- Handle Errors
+  - If any error occurs, it logs the issue (logging.info()).
+  - The database transaction is rolled back using db.session.rollback(), ensuring consistency.
+  - The API returns an appropriate error response to the user.
+- Return API Response
+  - A success response is sent to the application, including:
+    - Temporary password ("temp": random)
+    - A message instructing the user to check their email for the password.
+  - The API completes execution successfully.
+
+#### Summary 
+- User sends a POST request with their username.
+- Username validation: Rejects invalid usernames.
+- Database check: Verifies if the user exists.
+- Generate temporary password: Creates and hashes a password.
+- Store temporary password: Updates the database.
+- Send email notification: Emails the temporary password.
+- Send SMS notification: Sends an alert via SMS.
+- Handle exceptions: Logs errors and rolls back transactions if needed.
+- Send response: Returns success or failure messages.
+
+
+ 
+```mermaid
+sequenceDiagram
+    participant User
+    participant API
+    participant DB
+    participant EmailService
+    participant SMSService
+
+    User->>API: POST /password/recover (username)
+    API->>DB: Check if username exists
+    alt User not found
+        API->>User: Error - User does not exist
+    else User exists
+        API->>API: Generate temporary password
+        API->>DB: Update temporary password
+        API->>EmailService: Send email with password
+        API->>SMSService: Send SMS notification
+        API->>User: Success - Password sent
+    end   
+```
+
 
 ### Password-Update 
 
