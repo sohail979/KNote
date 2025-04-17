@@ -1327,6 +1327,72 @@ sequenceDiagram
 
 
 ### Password-Update 
+#### API WorkFlow 
+- Receive Username & Password
+  - The API receives username and new password from the request using getCleanRequestData().
+  - It validates both:
+    - Username: Checked using validUsername(username).
+    - Password: Checked using validPassword(password).
+- If either is invalid, the API returns an error response.
+
+- Verify User Existence
+  - Queries the KittycashUser database using KittycashUser.query.filter_by(username=username).first().
+  - If the user does not exist, an error response is returned.
+- Update Password
+  - If the user exists, their password is hashed using generate_password_hash(password).
+  - The temporary password field is cleared (user.temppassword = '').
+  - The changes are committed to the database using db.session.commit().
+
+- Send Email Notification
+  - The API constructs an email notification about the password update.
+  - The email includes a security advisory in case the change wasn’t initiated by the user.
+  - The email is sent using emailUser.submit(username, subject, contents).
+
+- Send SMS Notification
+  - Retrieves the user's contact number from the KittycashProfile database.
+  - Sends an SMS alert using smsUser.submit(str(profile.contactno), message).
+
+- Handle Errors
+  - If any exception occurs, it logs the error (logging.info()).
+  - Rolls back the database transaction (db.session.rollback()).
+  - Returns an error response to the application.
+
+-  Return API Response
+   - If everything succeeds, the API returns a success response indicating the password was updated.
+#### Summary
+
+- User sends a POST request with username and password.
+- Username & password validation: Rejects invalid inputs.
+- Database lookup: Checks if the user exists.
+- Update password: Stores the new hashed password.
+- Clear temporary password field to enhance security.
+- Send email notification to the user.
+- Send SMS notification for extra confirmation.
+- Handle errors: Logs them and rolls back transactions if needed.
+- Send response: Confirms success or failure.
+
+ 
+```mermaid
+sequenceDiagram
+    participant User
+    participant API
+    participant DB
+    participant EmailService
+    participant SMSService
+
+    User->>API: POST /password/update (username, password)
+    API->>DB: Validate username & password
+    alt User not found
+        API->>User: Error - User does not exist
+    else User exists
+        API->>API: Hash new password
+        API->>DB: Update password & clear temp password
+        API->>EmailService: Send password update email
+        API->>SMSService: Send SMS notification
+        API->>User: Success - Password updated
+    end
+
+```
 
 
 ## Logout 
