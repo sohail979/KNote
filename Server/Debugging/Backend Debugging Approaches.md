@@ -816,6 +816,7 @@ SELECT * FROM kittycash_profile_key WHERE pid = 'test_pid_123';
   - With logs ```python run_tests.py suite_3.yaml --log-level=DEBUG```
   - With coverage ```python run_tests.py suite_3.yaml --with-coverage```
   - Logs and Coverage ```python run_tests.py suite_3.yaml --log-level=DEBUG --with-coverage```
+  - Updated ```API_BASE_URL=http://172.17.0.1:8080 python run_tests.py suite_5.yaml --log-level=DEBUG --with-coverage```
 - **Result:**
 
 
