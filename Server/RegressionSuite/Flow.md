@@ -21,7 +21,7 @@
   - [Group-Payout-Webhook](#Group-Payout-Webhook)
  
  
-### **1. User Signup**
+## **User Signup**
 - Generates test users using `load_test_users()`.
 - Attempts to **sign up each user** through the `/signup` endpoint.
 - Verifies that at least **10 users are successfully signed up**.
