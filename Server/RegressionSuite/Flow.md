@@ -3,7 +3,7 @@
 
 - [UserSignup](#UserSignup)
 - [UserLogin](#UserLogin)
-- [TokenGeneration&Refresh](#TokenGeneration&Refresh)
+- [GenerateTokens](#GenerateTokens)
 
  
  
@@ -24,7 +24,7 @@
 - Logs all login responses for debugging.
 
 
-## **TokenGeneration&Refresh**
+## **GenerateTokens**
 - Logs in **5 valid users** (can be modified to 5) and retrieves their `access_token` and `refresh_token`.
 - Tests **refresh token flow**:
   - **Before token expiry:** Tries to refresh the token (expects failure with `325` status code).
