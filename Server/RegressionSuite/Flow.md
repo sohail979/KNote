@@ -1,6 +1,26 @@
- 
-## Regression Suite Flow 
+# Regression Suite Flow 
 
+
+- [User Signup](#User Signup)
+  - [APIWorkflow](#APIWorkflow)
+  - [Responses](#Responses)
+- [Kcusers](#Kcusers)
+- [Login](#Login)
+  - [Login-Twophaseauth-Passcode-Validate](#Login-Twophaseauth-Passcode-Validate)
+  - [Login-Twophaseauth-Passcode-Validate-Generate](#Login-Twophaseauth-Passcode-Validate-Generate)
+- [generateTokens](#generateTokens)
+- [Cleantables](#Cleantables)
+- [Signdown](#Signdown)
+- [Password](#Password)
+  - [PasswordRecover](#Password-Recover)
+  - [PasswordUpdate](#Password-Update)
+- [Logout](#Logout)
+- [Webhook](#Webhook)
+  - [Identity-Webhook](#Identity-Webhook)
+  - [Group-Subscription-Webhook](#Group-Subscription-Webhook)
+  - [Group-Payout-Webhook](#Group-Payout-Webhook)
+ 
+ 
 ### **1. User Signup**
 - Generates test users using `load_test_users()`.
 - Attempts to **sign up each user** through the `/signup` endpoint.
